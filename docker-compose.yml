@@ -1,0 +1,42 @@
+version: '3.3'
+
+services:
+  gateway:
+    container_name: gateway
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - web
+      - postgres
+      - users
+
+  web:
+    container_name: web
+    build:
+      context: ./web
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - users
+
+  users:
+    container_name: users
+    build:
+      context: ./users
+    volumes:
+      - ./users:/app
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: postgres_db
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_password
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
