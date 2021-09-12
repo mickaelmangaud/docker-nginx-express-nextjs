@@ -1,10 +1,21 @@
-import express, {Request, Response} from 'express';
+import express from 'express';
+import { initDatabaseConnection } from './config/db';
+import { configureRoutes } from './routes';
+import { applyMiddlewares } from './middlewares';
+import { User } from './entities/User';
 
-const app = express();
 const PORT = process.env.PORT || 3001;
+const app = express();
 
-app.get('*', (req: Request, res: Response) => {
-  res.send('hello from user-service !!!');
-});
+initDatabaseConnection()
+  .then(async (connection) => {
+    console.log(`👌 [POSTGRES]: Connection OK`);
 
-app.listen(PORT, () => console.log(`API listening on port ${PORT}!!!`));
+    applyMiddlewares(app);
+    configureRoutes(app);
+
+    app.listen(PORT, () => {
+      console.log(`🚀 [Users-service]: Running on port ${PORT}`);
+    });
+  })
+  .catch((error) => console.log(error));
